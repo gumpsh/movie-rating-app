@@ -70,7 +70,6 @@ export default function StarRating({
             : tempRating || rating || ""}
         </p>
       </div>
-      /<button style={buttonStyle}>+ Add to list</button>
     </div>
   );
 }
