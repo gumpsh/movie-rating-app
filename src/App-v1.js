@@ -62,9 +62,15 @@ export default function App() {
   }
 
   async function handleSelectedMovie(id) {
-    setSelectedMovieId(id);
-    const watchedMovie = movies.find((m) => id === m.imdbID);
-    setWatched((current) => [...current, watchedMovie]);
+    setSelectedMovieId((selectedId) => (selectedId === id ? null : id));
+
+    if (selectedMovieId) {
+      const watchedMovie = movies.find((m) => id === m.imdbID);
+
+      if (!watched.includes(watchedMovie)) {
+        setWatched((current) => [...current, watchedMovie]);
+      }
+    }
 
     try {
       setError("");
@@ -88,18 +94,41 @@ export default function App() {
     }
   }
 
-  function MovieDetails({ details }) {
+  function handleCloseMovie() {
+    setSelectedMovieId(null);
+    setDetails({});
+  }
+
+  function MovieDetails({ details, onClose }) {
     return (
       <div className="details">
-        <h3>{details.Title}</h3>
-        <section>
+        <header>
+          <button className="btn-back" onClick={onClose}>
+            &larr;
+          </button>
           <img src={details.Poster} alt={`${details.Title} poster`} />
-          <StarRating />
+          <div className="details-overview">
+            <h2>{details.Title}</h2>
+            <p>
+              {details.Year} &bull; {details.Runtime}
+            </p>
+            <p>{details.Genre}</p>
+            <p>
+              <span>⭐</span>
+              {details.imdbRating} IMDb rating
+            </p>
+          </div>
+        </header>
+        <section>
+          <p>
+            <em>{details.Plot}</em>
+          </p>
+          <p>Starring: {details.Actors}</p>
+          <p>Directed by: {details.Director}</p>
+          <div className="rating">
+            <StarRating maxRating={10} size={16} />
+          </div>
         </section>
-        <div className="details-overview">
-          <h2>{details.Genre}</h2>
-          <p>{details.Plot}</p>
-        </div>
         {details?.Ratings?.map((rating, i) => (
           <Rating key={i} source={rating.Source} value={rating.Value} />
         ))}
@@ -135,7 +164,7 @@ export default function App() {
           {loading && <Loading />}
           {error && <ErrorMessage message={error} />}
           {selectedMovieId ? (
-            <MovieDetails details={details} />
+            <MovieDetails details={details} onClose={handleCloseMovie} />
           ) : (
             <>
               <Summary watched={watched} />
