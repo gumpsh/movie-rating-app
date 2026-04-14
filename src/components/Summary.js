@@ -1,9 +1,11 @@
 export default function Summary({ watched }) {
-  const average = (arr) => arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+  function average(arr) {
+    return arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
+  }
 
-  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
-  const avgUserRating = average(watched.map((movie) => movie.userRating));
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
+  const avgImdbRating = average(watched.map((movie) => Number(movie?.imdbRating))).toFixed(2);
+  const avgUserRating = average(watched.map((movie) => Number(movie?.userRating))).toFixed(2);
+  const avgRuntime = average(watched.map((movie) => Number(parseInt(movie?.Runtime)))).toFixed(2);
 
   return (
     <div className="summary">

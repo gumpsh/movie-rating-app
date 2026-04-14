@@ -65,10 +65,14 @@ export default function App() {
     setSelectedMovieId((selectedId) => (selectedId === id ? null : id));
 
     if (selectedMovieId) {
-      const watchedMovie = movies.find((m) => id === m.imdbID);
+      //const watchedMovie = movies.find((m) => id === m.imdbID);
+      const watchedMovie = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`);
+      const data = await watchedMovie.json();
 
-      if (!watched.includes(watchedMovie)) {
-        setWatched((current) => [...current, watchedMovie]);
+      const ids = watched.map((w) => w.imdbID);
+
+      if (!ids.includes(data.imdbID)) {
+        setWatched((current) => [...current, data]);
       }
     }
 
@@ -168,7 +172,7 @@ export default function App() {
           ) : (
             <>
               <Summary watched={watched} />
-              <List list={watched} />
+              <List list={watched} onSelect={() => {}} />
             </>
           )}
         </ListBox>
