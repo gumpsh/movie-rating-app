@@ -16,14 +16,14 @@ const starContainer = {
   display: "flex",
 };
 
-const buttonStyle = {
-  marginTop: "8px",
-  padding: "8px 16px",
-  borderRadius: "16px",
-  border: "none",
-  color: "white",
-  backgroundColor: "purple",
-};
+// const buttonStyle = {
+//   marginTop: "8px",
+//   padding: "8px 16px",
+//   borderRadius: "16px",
+//   border: "none",
+//   color: "white",
+//   backgroundColor: "purple",
+// };
 
 export default function StarRating({
   maxRating = 5,
@@ -31,10 +31,13 @@ export default function StarRating({
   size = 24,
   messages = [],
   defaultRating,
+  onSetRating,
   // setFilmRating,
 }) {
-  const [rating, setRating] = useState(defaultRating);
+  //const [rating, setRating] = useState(defaultRating);
   const [tempRating, setTempRating] = useState(0);
+  const [rating, setRating] = useState(0);
+
   const textStyle = {
     lineHeight: "1",
     margin: "0",
@@ -43,9 +46,11 @@ export default function StarRating({
     color,
   };
 
+  //let rating = 0;
+
   function handleRating(selectedRating) {
     setRating(selectedRating);
-    // setFilmRating(selectedRating);
+    onSetRating(selectedRating);
   }
 
   return (

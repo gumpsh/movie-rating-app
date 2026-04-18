@@ -19,6 +19,7 @@ export default function App() {
   const [error, setError] = useState("");
   const [selectedMovieId, setSelectedMovieId] = useState();
   const [details, setDetails] = useState({});
+  const [userRating, setUserRating] = useState("");
 
   useEffect(() => {
     async function fetchMovies() {
@@ -64,18 +65,6 @@ export default function App() {
   async function handleSelectedMovie(id) {
     setSelectedMovieId((selectedId) => (selectedId === id ? null : id));
 
-    if (selectedMovieId) {
-      //const watchedMovie = movies.find((m) => id === m.imdbID);
-      const watchedMovie = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${selectedMovieId}`);
-      const data = await watchedMovie.json();
-
-      const ids = watched.map((w) => w.imdbID);
-
-      if (!ids.includes(data.imdbID)) {
-        setWatched((current) => [...current, data]);
-      }
-    }
-
     try {
       setError("");
       setIsLoading(true);
@@ -85,7 +74,6 @@ export default function App() {
       if (!response.ok) throw new Error("Fetching Movie Failed");
 
       const data = await response.json();
-      //console.log("details", data);
 
       // Data not found
       if (data.Response === "False") throw new Error("Movie details not found");
@@ -98,12 +86,32 @@ export default function App() {
     }
   }
 
+  function handleAddToWatched() {
+    console.log("movie to add to watched: ", details);
+    const { Title: title, Year: year, Poster: poster, Runtime: runtime, imdbRating } = details;
+
+    const newWatchedMovie = {
+      imdbID: selectedMovieId,
+      title,
+      year,
+      poster: poster,
+      userRating: userRating,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runtime.split(" ").at(0)),
+    };
+
+    setWatched((current) => [...current, newWatchedMovie]);
+    handleCloseMovie();
+  }
+
   function handleCloseMovie() {
     setSelectedMovieId(null);
     setDetails({});
   }
 
   function MovieDetails({ details, onClose }) {
+    const isWatched = watched.map((w) => w.imdbID).includes(details.imdbID);
+
     return (
       <div className="details">
         <header>
@@ -129,9 +137,18 @@ export default function App() {
           </p>
           <p>Starring: {details.Actors}</p>
           <p>Directed by: {details.Director}</p>
-          <div className="rating">
-            <StarRating maxRating={10} size={16} />
-          </div>
+          {!isWatched ? (
+            <div className="rating">
+              <StarRating maxRating={10} size={16} onSetRating={setUserRating} />
+              {userRating > 0 && (
+                <button className="btn-add" onClick={handleAddToWatched}>
+                  + Add To Watched
+                </button>
+              )}
+            </div>
+          ) : (
+            <p className="rating">Movie Already Rated</p>
+          )}
         </section>
         {details?.Ratings?.map((rating, i) => (
           <Rating key={i} source={rating.Source} value={rating.Value} />
