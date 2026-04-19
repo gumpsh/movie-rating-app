@@ -1,6 +1,6 @@
-export default function WatchedMovie({ movie }) {
+export default function WatchedMovie({ movie, onSelect }) {
   return (
-    <li>
+    <li onClick={() => onSelect(movie)}>
       <img src={movie.poster} alt={`${movie.title} poster`} />
       <h3>{movie.title}</h3>
       <div>

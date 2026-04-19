@@ -6,7 +6,7 @@ export default function List({ list, onSelect }) {
     <ul className="list list-movies">
       {list.map((m, i) =>
         list[i].runtime ? (
-          <WatchedMovie key={m.imdbID} movie={m} />
+          <WatchedMovie key={m.imdbID} movie={m} onSelect={() => onSelect(m.imdbID)} />
         ) : (
           <Movie key={m.imdbID} movie={m} onSelect={() => onSelect(m.imdbID)} />
         ),

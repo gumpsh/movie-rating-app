@@ -3,6 +3,7 @@ import List from "./components/List";
 import ListBox from "./components/ListBox";
 import Logo from "./components/Logo";
 import Main from "./components/Main";
+import Modal from "./components/Modal";
 import NavBar from "./components/NavBar";
 import NumResults from "./components/NumResults";
 import Search from "./components/Search";
@@ -18,8 +19,10 @@ export default function App() {
   const [loading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedMovieId, setSelectedMovieId] = useState();
+  const [movieToRemoveId, setMovieToRemoveId] = useState();
   const [details, setDetails] = useState({});
   const [userRating, setUserRating] = useState("");
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     async function fetchMovies() {
@@ -87,7 +90,6 @@ export default function App() {
   }
 
   function handleAddToWatched() {
-    console.log("movie to add to watched: ", details);
     const { Title: title, Year: year, Poster: poster, Runtime: runtime, imdbRating } = details;
 
     const newWatchedMovie = {
@@ -109,8 +111,26 @@ export default function App() {
     setDetails({});
   }
 
+  function handleConfirmRemove(id) {
+    setShowDialog(true);
+    setMovieToRemoveId(id);
+  }
+
+  function handleRemoveFromWatchedList() {
+    const watchedMinusSelected = watched.filter((m) => m.imdbID !== movieToRemoveId);
+    setWatched(watchedMinusSelected);
+    setShowDialog(false);
+  }
+
   function MovieDetails({ details, onClose }) {
-    const isWatched = watched.map((w) => w.imdbID).includes(details.imdbID);
+    let isWatched = false;
+
+    if (watched.length > 0) {
+      isWatched = watched.map((w) => w.imdbID).includes(details.imdbID);
+    }
+
+    const movie = watched.find((m) => m.imdbID === details.imdbID);
+    const rating = movie?.userRating;
 
     return (
       <div className="details">
@@ -147,7 +167,7 @@ export default function App() {
               )}
             </div>
           ) : (
-            <p className="rating">Movie Already Rated</p>
+            <p className="rated">You Rated This Movie {rating} ⭐</p>
           )}
         </section>
         {details?.Ratings?.map((rating, i) => (
@@ -189,7 +209,13 @@ export default function App() {
           ) : (
             <>
               <Summary watched={watched} />
-              <List list={watched} onSelect={() => {}} />
+              <List list={watched} onSelect={handleConfirmRemove} />
+              {showDialog && (
+                <Modal open={showDialog} onDismiss={() => setShowDialog(false)}>
+                  <p>Confirm Remove</p>
+                  <button onClick={handleRemoveFromWatchedList}>Remove</button>
+                </Modal>
+              )}
             </>
           )}
         </ListBox>

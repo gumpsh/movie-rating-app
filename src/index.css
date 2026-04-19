@@ -293,6 +293,16 @@ body {
   gap: 2.4rem;
 }
 
+.rated {
+  background-color: var(--color-background-100);
+  border-radius: 0.9rem;
+  padding: 2rem 2.4rem;
+  margin-bottom: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  gap: 2.4rem;
+}
+
 .btn-add {
   background-color: var(--color-primary);
   color: var(--color-text);
@@ -339,6 +349,41 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.modal {
+  padding: 2.2rem 3.2rem 1.8rem 3.2rem;
+  border-radius: 0.9rem;
+  background-color: var(--color-background-100);
+  box-shadow: 0 1.2rem 2.4rem rgba(0, 0, 0, 0.2);
+}
+
+/* .modal {
+  max-width: 50vw;
+  text-align: center;
+  padding: 2rem;
+  border: 0;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem 0.25rem hsl(0 0% 0% / 10%);
+} */
+
+.modalButton {
+  background-color: var(--color-primary);
+  border: none;
+  color: var(--color-text);
+  padding: 10px 20px;
+  text-align: center;
+  align-self: center;
+  cursor: pointer;
+  border-radius: 24px;
+  font-size: 1rem;
+  font-weight: bold;
+  width: 8rem;
+  margin-top: 3rem;
+}
+
+.modalButton:hover {
+  background-color: var(--color-primary-light)
 }
 
 /*
