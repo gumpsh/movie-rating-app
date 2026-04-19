@@ -10,7 +10,8 @@ import Search from "./components/Search";
 import StarRating from "./components/StarRating";
 import Summary from "./components/Summary";
 
-const KEY = "1a521789";
+const KEY = process.env.REACT_APP_OMDB_API_KEY;
+console.log("omdb api key:", KEY);
 
 export default function App() {
   const [movies, setMovies] = useState([]);
