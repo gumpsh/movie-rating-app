@@ -1,11 +1,5 @@
 import { useState } from "react";
 
-const outerContainer = {
-  // display: "flex",
-  // flexDirection: "column",
-  // alignItems: "center",
-};
-
 const container = {
   display: "flex",
   alignItems: "center",
@@ -16,25 +10,7 @@ const starContainer = {
   display: "flex",
 };
 
-// const buttonStyle = {
-//   marginTop: "8px",
-//   padding: "8px 16px",
-//   borderRadius: "16px",
-//   border: "none",
-//   color: "white",
-//   backgroundColor: "purple",
-// };
-
-export default function StarRating({
-  maxRating = 5,
-  color = "gold",
-  size = 24,
-  messages = [],
-  defaultRating,
-  onSetRating,
-  // setFilmRating,
-}) {
-  //const [rating, setRating] = useState(defaultRating);
+export default function StarRating({ maxRating = 5, color = "gold", size = 24, messages = [], onSetRating }) {
   const [tempRating, setTempRating] = useState(0);
   const [rating, setRating] = useState(0);
 
@@ -46,15 +22,13 @@ export default function StarRating({
     color,
   };
 
-  //let rating = 0;
-
   function handleRating(selectedRating) {
     setRating(selectedRating);
     onSetRating(selectedRating);
   }
 
   return (
-    <div style={outerContainer}>
+    <div>
       <div style={container}>
         <div style={starContainer}>
           {Array.from({ length: maxRating }, (_, i) => (

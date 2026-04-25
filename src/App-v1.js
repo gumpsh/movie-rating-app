@@ -25,12 +25,14 @@ export default function App() {
   const [userRating, setUserRating] = useState("");
   const [showDialog, setShowDialog] = useState(false);
 
+  // Fetch movies effect
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchMovies() {
       try {
         setError("");
         setIsLoading(true);
-        const result = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${title}`);
+        const result = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${title}`, { signal: controller.signal });
 
         // Bad network or server error
         if (!result.ok) throw new Error("Fetching Movies Failed");
@@ -55,8 +57,24 @@ export default function App() {
       return;
     }
 
+    handleCloseMovie();
     fetchMovies();
+
+    return function () {
+      controller.abort();
+    };
   }, [title]);
+
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.code === "Escape" && selectedMovieId) {
+        handleCloseMovie();
+      }
+    }
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [selectedMovieId]);
 
   function Loading() {
     return <p className="loader">Loading...</p>;
@@ -132,6 +150,15 @@ export default function App() {
 
     const movie = watched.find((m) => m.imdbID === details.imdbID);
     const rating = movie?.userRating;
+
+    useEffect(() => {
+      if (!details) return;
+      document.title = details?.Title;
+
+      return function () {
+        document.title = "Use Popcorn";
+      };
+    }, [details]);
 
     return (
       <div className="details">

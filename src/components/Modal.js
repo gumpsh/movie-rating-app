@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import "../index.css";
 
 export default function Modal({ open, onDismiss, children }) {
   const modalRef = useRef(null);
@@ -6,7 +7,6 @@ export default function Modal({ open, onDismiss, children }) {
   useEffect(() => {
     const modalElement = modalRef.current;
     if (!modalElement) return;
-    console.log("Modal ref:", modalRef.current);
     open ? modalElement.showModal() : modalElement.close();
   }, [open]);
 
@@ -18,14 +18,13 @@ export default function Modal({ open, onDismiss, children }) {
 
   return (
     <dialog
-      className="summary"
       ref={modalRef}
       onMouseDown={handleBackdropClick}
       onCancel={(e) => {
         e.preventDefault();
         onDismiss();
       }}>
-      <div className="summary" onMouseDown={(e) => e.stopPropagation()}>
+      <div className="modal" onMouseDown={(e) => e.stopPropagation()}>
         {children}
       </div>
     </dialog>
