@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import List from "./components/List";
 import ListBox from "./components/ListBox";
 import Logo from "./components/Logo";
@@ -9,61 +9,35 @@ import NumResults from "./components/NumResults";
 import Search from "./components/Search";
 import StarRating from "./components/StarRating";
 import Summary from "./components/Summary";
+import { useMovies } from "./useMovies";
 
 const KEY = process.env.REACT_APP_OMDB_API_KEY;
 console.log("omdb api key:", KEY);
 
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
   const [title, setTitle] = useState("");
-  const [loading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [loadingDetails, setIsLoadingDetails] = useState(false);
+  const [errorDetails, setErrorDetails] = useState("");
   const [selectedMovieId, setSelectedMovieId] = useState();
   const [movieToRemoveId, setMovieToRemoveId] = useState();
   const [details, setDetails] = useState({});
   const [userRating, setUserRating] = useState("");
   const [showDialog, setShowDialog] = useState(false);
+  const [watched, setWatched] = useState(function () {
+    const persistedMovies = localStorage.getItem("watched-movies");
+    return JSON.parse(persistedMovies);
+  });
 
-  // Fetch movies effect
+  const handleCloseMovie = useCallback(() => {
+    setSelectedMovieId(null);
+    setDetails({});
+  }, []);
+
+  const { movies, loading, error } = useMovies(title, handleCloseMovie);
+
   useEffect(() => {
-    const controller = new AbortController();
-    async function fetchMovies() {
-      try {
-        setError("");
-        setIsLoading(true);
-        const result = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${title}`, { signal: controller.signal });
-
-        // Bad network or server error
-        if (!result.ok) throw new Error("Fetching Movies Failed");
-
-        const data = await result.json();
-
-        // Data not found
-        if (data.Response === "False" && title.length >= 3) throw new Error("No Matches Found");
-
-        setMovies(data?.Search);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    // Avoid fetch on every key stroke
-    if (title.length < 3) {
-      setMovies([]);
-      setError("");
-      return;
-    }
-
-    handleCloseMovie();
-    fetchMovies();
-
-    return function () {
-      controller.abort();
-    };
-  }, [title]);
+    localStorage.setItem("watched-movies", JSON.stringify(watched));
+  }, [watched]);
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -74,7 +48,7 @@ export default function App() {
     document.addEventListener("keydown", handleKeyDown);
 
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [selectedMovieId]);
+  }, [selectedMovieId, handleCloseMovie]);
 
   function Loading() {
     return <p className="loader">Loading...</p>;
@@ -88,8 +62,8 @@ export default function App() {
     setSelectedMovieId((selectedId) => (selectedId === id ? null : id));
 
     try {
-      setError("");
-      setIsLoading(true);
+      setErrorDetails("");
+      setIsLoadingDetails(true);
       const response = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&i=${id}`);
 
       // Bad network or server error
@@ -102,9 +76,9 @@ export default function App() {
 
       setDetails(data);
     } catch (error) {
-      setError(error.message);
+      setErrorDetails(error.message);
     } finally {
-      setIsLoading(false);
+      setIsLoadingDetails(false);
     }
   }
 
@@ -119,16 +93,17 @@ export default function App() {
       userRating: userRating,
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
+      ratingsCount: 0,
     };
 
-    setWatched((current) => [...current, newWatchedMovie]);
+    setWatched((watched) => [...watched, newWatchedMovie]);
     handleCloseMovie();
   }
 
-  function handleCloseMovie() {
-    setSelectedMovieId(null);
-    setDetails({});
-  }
+  // function handleCloseMovie() {
+  //   setSelectedMovieId(null);
+  //   setDetails({});
+  // }
 
   function handleConfirmRemove(id) {
     setShowDialog(true);
@@ -143,6 +118,8 @@ export default function App() {
 
   function MovieDetails({ details, onClose }) {
     let isWatched = false;
+
+    const ratingRef = useRef(0);
 
     if (watched.length > 0) {
       isWatched = watched.map((w) => w.imdbID).includes(details.imdbID);
@@ -159,6 +136,10 @@ export default function App() {
         document.title = "Use Popcorn";
       };
     }, [details]);
+
+    useEffect(() => {
+      if (userRating) ratingRef.current = ratingRef.current + 1;
+    }, [userRating]);
 
     return (
       <div className="details">
@@ -217,6 +198,7 @@ export default function App() {
   }
 
   return (
+    // <CurrencyConverter />
     <>
       <NavBar>
         <Logo logo="🍿" title={"usePopcorn"} />
@@ -230,8 +212,8 @@ export default function App() {
           {error && <ErrorMessage message={error} />}
         </ListBox>
         <ListBox>
-          {loading && <Loading />}
-          {error && <ErrorMessage message={error} />}
+          {loadingDetails && <Loading />}
+          {errorDetails && <ErrorMessage message={error} />}
           {selectedMovieId ? (
             <MovieDetails details={details} onClose={handleCloseMovie} />
           ) : (
