@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import "../index.css";
+import { UseKeyDown } from "../useKeyDown";
 
 export default function Search({ onSetTitle, query }) {
   const inputRef = useRef();
@@ -8,18 +9,13 @@ export default function Search({ onSetTitle, query }) {
     inputRef.current.focus();
   }, []);
 
-  useEffect(() => {
-    function callback(e) {
-      if (document.activeElement === inputRef.current) return;
-      if (e.code === "Enter") {
-        inputRef.current.focus();
-        onSetTitle("");
-      }
-    }
-    document.addEventListener("keydown", callback);
+  UseKeyDown("Enter", function () {
+    // If already focused - return
+    if (document.activeElement === inputRef.current) return;
 
-    return () => document.addEventListener("keydown", callback);
-  }, [onSetTitle]);
+    inputRef.current.focus();
+    onSetTitle("");
+  });
 
   return (
     <input
